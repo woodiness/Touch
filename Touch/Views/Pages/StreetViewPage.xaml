@@ -1,0 +1,30 @@
+﻿<Page
+    x:Class="Touch.Views.Pages.StreetViewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:userControls="using:Touch.Views.UserControls"
+    mc:Ignorable="d"
+    Loaded="Page_Loaded">
+
+    <Page.Transitions>
+        <TransitionCollection>
+            <EntranceThemeTransition />
+        </TransitionCollection>
+    </Page.Transitions>
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <!--<Button Grid.Row="1" Click="Button_Click" HorizontalAlignment="Center" >街景展示</Button>-->
+        <!-- 街景地图 -->
+        <WebView x:Name="Webview1" />
+        <userControls:VideoButtonControl x:Name="VideoButtonGrid" Visibility="Collapsed"
+                                         OnPlayButtonClicked="Button_Click" OnReplayButtonClicked="Button_Click" />
+        <userControls:ProgressRingGridControl x:Name="ProgressRingGrid" Visibility="Collapsed" />
+        <!-- 返回按钮 -->
+        <userControls:BackButtonControl x:Name="BackButtonControl" />
+        <!-- 街景图片 -->
+        <userControls:StreetGalleryControl x:Name="StreetGalleryControl" Shown="False"
+                                           OnBackButtonClicked="ShowEndButton" />
+    </Grid>
+</Page>

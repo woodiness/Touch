@@ -1,0 +1,50 @@
+﻿<Page
+    x:Class="Touch.Views.Pages.SettingPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:userControls="using:Touch.Views.UserControls"
+    mc:Ignorable="d">
+
+    <Page.Transitions>
+        <TransitionCollection>
+            <EntranceThemeTransition />
+        </TransitionCollection>
+    </Page.Transitions>
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <userControls:TransparentBackgroundControl />
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <userControls:TitleBarControl x:Name="TitleBarControl" Grid.Row="0" />
+
+            <Pivot Grid.Row="1" Style="{StaticResource MyPivotStyle}"
+                   ItemContainerStyle="{StaticResource MyPivotItemStyle}" Margin="0,8,0,0">
+                <PivotItem>
+                    <PivotItem.Header>
+                        <TextBlock x:Uid="SettingText" />
+                    </PivotItem.Header>
+
+                    <Grid Background="White">
+                        <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto">
+                            <Grid>
+                                <StackPanel>
+                                    <!-- 文件夹 源 -->
+                                    <userControls:FolderSourceControl />
+                                    <!-- 关于 -->
+                                    <userControls:AboutControl />
+                                </StackPanel>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </PivotItem>
+            </Pivot>
+        </Grid>
+    </Grid>
+</Page>

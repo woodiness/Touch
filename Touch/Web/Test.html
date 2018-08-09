@@ -1,0 +1,264 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Street View</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #street-view { height: 100%; }
+    </style>
+</head>
+<body>
+<div id="street-view"></div>
+<script>
+    var panorama;
+    var directionsDisplay;
+    var isClick = false;
+    var pathArray = new Array();
+    var directionsService;
+    var isGetPath = false;
+    var marker2;
+    var waypts;
+    var netCheck = false;
+    var currentPano;
+
+    function initialize() {
+        waypts = [];
+        map = new google.maps.Map(document.getElementById('street-view'),
+            {
+                center: { lat: 22.277782, lng: 114.170241 },
+                zoom: 2,
+            });
+        directionsDisplay = new google.maps.DirectionsRenderer();
+        directionsDisplay.setMap(map);
+        directionsService = new google.maps.DirectionsService();
+        panorama = new google.maps.StreetViewPanorama(document.getElementById('street-view'));
+        //panorama = map.getStreetView();
+        map.setStreetView(panorama);
+        //panorama.setPosition({ lat: 22.277782, lng: 114.170241 });
+        panorama.setVisible(false);
+        panorama.setOptions({
+            linksControl: false,
+            addressControlOptions:
+            {
+                position: google.maps.ControlPosition.LEFT_BOTTOM
+            },
+            enableCloseButton: false,
+            zoomControl: false,
+        });
+        google.maps.event.clearListeners(map, 'mousemove');
+        if (window.navigator.onLine)
+            netCheck = true;
+        else netCheck = false;
+    }
+
+    function firstSetPanorama(x, y) {
+        panorama.setVisible(true);
+        panorama.setPosition({
+            lat: x,
+            lng: y
+        });
+        panorama.addListener('status_changed', setCurrentStatus);
+    }
+
+    function setCurrentStatus() {
+        if (panorama.getStatus() == google.maps.StreetViewStatus.OK) {
+            currentPano = panorama.getPano();
+        } else currentPano = 'N';
+    } //设置当前状态
+
+    function getCurrentStatus() {
+        return currentPano;
+    }
+
+    function getNetCheck() {
+        if (netCheck) return 'Y';
+        else return 'N';
+    }
+
+    function streetShowEnd() {
+        panorama.setVisible(false);
+    }
+
+    /*function insertMark(markLat, markLng, num)
+    {
+        timeoutId = setTimeout("insertMark2(" + markLat + "," + markLng + ")", 2000);
+    }*/
+    function insertMark(markLat, markLng, num) {
+        var imgPath;
+        /*if (num === 0) {//可根据num显示照片
+            imgPath = 'http://123.206.78.137:8080/Download/Source/IMG_20160902_124718.jpg';
+        } else {
+            imgPath = 'http://123.206.78.137:8080/Download/Source/IMG_20160902_125939.jpg';
+        }*/
+        var image = {
+            url: 'http://uvp.neu.edu.cn/touch.png',
+            // This marker is 20 pixels wide by 32 pixels high.
+            size: new google.maps.Size(300, 300),
+            // The origin for this image is (0, 0).
+            origin: new google.maps.Point(0, 0), //截取位置
+            // The anchor for this image is the base of the flagpole at (0, 32).
+            anchor: new google.maps.Point(100, 400), //高度
+            scaledSize: new google.maps.Size(300, 300),
+            //labelOrigin: new google.maps.Point(100, 100)
+        };
+        marker2 = new google.maps.Marker({
+            position: { lat: markLat, lng: markLng },
+            map: panorama,
+            icon: image,
+            opacity: 0.8,
+        });
+        var info = new google.maps.InfoWindow({
+            position: { lat: markLat, lng: markLng },
+            content: '点击查看此处回忆',
+            pixelOffset: { height: 0, width: 0 },
+            disableAutoPan: false
+        });
+        /*marker2.addListener('mouseover', function () { info.open(panorama,marker2); });
+        marker2.addListener('mouseout', function () { info.close(); });*/
+        marker2.addListener('click',
+            function() {
+                isClick = true;
+                marker2.setVisible(false);
+                google.maps.event.clearListeners(marker2, 'click');
+                google.maps.event.clearListeners(marker2, 'mouseover');
+                google.maps.event.clearListeners(marker2, 'mouseout');
+                info.close();
+            });
+        setMarkHeading();
+    }
+
+
+    function insertOneMark(markLat, markLng) {
+        map.setCenter({ lat: markLat, lng: markLng });
+        var marker2 = new google.maps.Marker({
+            position: { lat: markLat, lng: markLng },
+            map: map,
+        });
+        map.setZoom(20);
+        isGetPath = true;
+        netCheck = true;
+    }
+
+    function getClick() {
+        if (isClick) {
+            isClick = false;
+            return 'click';
+        } else return 'not click';
+    }
+
+    function addWayPoint(wayLat, wayLng) {
+        waypts.push({
+            location: { lat: wayLat, lng: wayLng },
+            stopover: true
+        });
+    }
+
+    function getPath(startLat, startLng, endLat, endLng) {
+        directionsService.route({
+                origin: { lat: startLat, lng: startLng },
+                destination: { lat: endLat, lng: endLng },
+                provideRouteAlternatives: false,
+                travelMode: 'WALKING',
+                waypoints: waypts,
+                unitSystem: google.maps.UnitSystem.IMPERIAL
+            },
+            function(result, status) {
+                if (status == 'OK') {
+                    directionsDisplay.setDirections(result); //地图中显示
+                    var short = 0;
+                    var x = result.routes[0].overview_path.length;
+                    for (var i in result.routes) {
+                        var tmp = result.routes[i].overview_path.length;
+                        if (tmp < x) {
+                            x = tmp;
+                            short = i;
+                        }
+                    }
+                    pathArray = result.routes[short].overview_path;
+                    isGetPath = true;
+                } else {
+                    console.log('no route');
+                }
+            });
+    }
+
+    function getPathPoint() {
+        var cot;
+        var pathPoint = '';
+        for (cot in pathArray)
+            pathPoint += pathArray[cot].lat() + ',' + pathArray[cot].lng() + '\n';
+        return pathPoint;
+    }
+
+    function setStreetViewPositon(x, y, heading) {
+        getNextHeading(x, y);
+        panorama.setPosition(
+            {
+                lat: x,
+                lng: y
+            });
+        //panorama.setPov({ heading: heading, pitch: 0 });
+        if (panorama.getStatus() == google.maps.StreetViewStatus.OK) {
+            return panorama.getPano();
+        } else return 'N';
+    }
+
+    function testIsGetPath() {
+        if (isGetPath) return 'Y';
+        else return 'N';
+    }
+
+    function setIsGetPath() {
+        isGetPath = false;
+    }
+
+    function getNextHeading(nextLat, nextLng) {
+        var nextLatLng = new google.maps.LatLng(nextLat, nextLng);
+        var heading2 = google.maps.geometry.spherical.computeHeading(panorama.location.latLng, nextLatLng);
+        panorama.setPov({ heading: heading2, pitch: 0 });
+    }
+
+    /*function changeHeadingAnimation2(heading) {
+
+        panorama.setPov({ heading: panorama.getPov().heading + heading, pitch: 0 });
+        if (cot < 1) {
+            cot++;
+            var t = setTimeout("changeHeadingAnimation(" + heading + ")", 100);
+        }
+    }*/
+    function setMarkHeading() {
+        var heading2 = google.maps.geometry.spherical.computeHeading(panorama.location.latLng, marker2.getPosition());
+        //panorama.setPov({ heading: heading2, pitch: 0 });
+        var difference = heading2 - panorama.getPov().heading;
+        if (Math.abs(difference) > 180) {
+            if (difference > 0) {
+                difference = -(360 - difference);
+            } else {
+                difference = 360 + difference;
+            }
+        }
+        difference = difference / 5;
+        cot = 0;
+        changeHeadingAnimation(difference);
+    }
+
+    function changeHeadingAnimation(heading) {
+
+        panorama.setPov({ heading: panorama.getPov().heading + heading, pitch: 0 });
+        if (cot < 4) {
+            cot++;
+            var t = setTimeout("changeHeadingAnimation(" + heading + ")", 200);
+        }
+    }
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2XzGNuHQLEd1AGjAnYkC6EoREiS_K09Q&callback=initialize">
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+﻿<UserControl
+    x:Class="Touch.Views.UserControls.AboutControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid>
+        <StackPanel>
+            <TextBlock x:Uid="AboutApp" Style="{ThemeResource TitleTextBlockStyle}" Margin="8" />
+            <TextBlock Name="AppInfoText" Margin="8" />
+            <Button Name="SendFeedbackButton" x:Uid="SendFeedback" Margin="8" />
+        </StackPanel>
+    </Grid>
+</UserControl>
